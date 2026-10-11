@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dice Bingo</title>
+<style>
+:root{--bg:#f3f6fb;--card:#fff;--tx:#14213d;--mu:#5a6785;--pr:#e63946;--tl:#1d9a8a;--sun:#ffbe0b;--bd:#d6deec;--ok:#16794a;--no:#b3261e;--hl:#fff3c4;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d1526;--card:#16213a;--tx:#e9eefc;--mu:#a3b2d3;--bd:#2b3a5c;--hl:#4a3f10;--ok:#4fd18b;--no:#ff8a80}}
+:root[data-theme="dark"]{--bg:#0d1526;--card:#16213a;--tx:#e9eefc;--mu:#a3b2d3;--bd:#2b3a5c;--hl:#4a3f10;--ok:#4fd18b;--no:#ff8a80}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.5 "Trebuchet MS","Segoe UI",system-ui,sans-serif}
+h1,h2,h3{line-height:1.2;margin:.3em 0}.mu{color:var(--mu)}.sm{font-size:.85rem}
+.shell{display:flex;min-height:100vh}.side{width:240px;flex:none;background:var(--card);border-right:1px solid var(--bd);padding:12px;position:sticky;top:0;max-height:100vh;overflow:auto}
+.side button{display:block;width:100%;text-align:left;background:none;border:0;color:var(--tx);padding:7px 10px;border-radius:8px;font:inherit;cursor:pointer}
+.side button.act{background:var(--pr);color:#fff;font-weight:700}.side button:hover:not(.act){background:var(--hl)}
+.main{flex:1;min-width:0;padding:18px;max-width:980px}.top{display:none;align-items:center;gap:10px;padding:10px 14px;background:var(--card);border-bottom:1px solid var(--bd);position:sticky;top:env(safe-area-inset-top,0px);z-index:15}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:16px;margin:0 0 14px}
+.btn{font:inherit;border:2px solid var(--tx);background:var(--card);color:var(--tx);border-radius:10px;padding:9px 16px;cursor:pointer;margin:3px}
+.btn.pr{background:var(--pr);border-color:var(--pr);color:#fff;font-weight:700}.btn:disabled{opacity:.45;cursor:not-allowed}
+:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+input,select{font:inherit;width:100%;padding:9px;border:2px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx)}input[type=checkbox]{width:auto}
+label{display:block;font-weight:700;margin:10px 0 3px}.er{color:var(--no);min-height:1.4em;font-weight:700}
+.narrow{max-width:460px;margin:0 auto;padding:18px}.c{text-align:center}.c label,.c input,.c select{text-align:left}.logo{font-size:3.4rem}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0 14px}
+.sts{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:14px}.st{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:10px}.st b{display:block;font-size:1.6rem}
+.bar{height:10px;background:var(--bd);border-radius:6px;overflow:hidden}.bar i{display:block;height:100%;background:var(--tl)}
+.board{display:grid;gap:6px;max-width:440px;margin:10px 0}.cell{aspect-ratio:1;font:700 1.1rem inherit;border:2px solid var(--bd);border-radius:10px;background:var(--card);color:var(--tx);cursor:pointer}
+.cell.hl{border-color:var(--sun);background:var(--hl);box-shadow:0 0 0 3px var(--sun)}.cell.m0{background:var(--tl);border-color:var(--tl);color:#fff}.cell.m1{background:var(--pr);border-color:var(--pr);color:#fff}
+.cell.fr{border-style:dashed;font-size:.7rem}.cell.win{outline:4px solid var(--sun);outline-offset:1px}
+.die{font-size:4rem;line-height:1;width:84px;height:84px;display:grid;place-items:center;background:var(--card);border:3px solid var(--tx);border-radius:16px}.die.spin{transform:rotate(18deg)}
+.row{display:flex;gap:14px;align-items:center;flex-wrap:wrap}.pill{border:2px solid var(--bd);border-radius:20px;padding:3px 12px}.pill.on{border-color:var(--pr);font-weight:700}
+.opt{display:block;width:100%;text-align:left;margin:6px 0;padding:11px;border:2px solid var(--bd);border-radius:10px;background:var(--bg);color:var(--tx);font:inherit;cursor:pointer}.opt.sel{border-color:var(--pr)}.opt.ok{border-color:var(--ok);background:var(--hl)}.opt.bad{border-color:var(--no)}
+.pic{font-size:4rem}table{border-collapse:collapse;width:100%}td,th{border-bottom:1px solid var(--bd);padding:6px;text-align:left}.tw{overflow-x:auto}
+.cert .cb{border:8px double var(--pr);padding:22px;text-align:center;background:var(--card);margin-bottom:8px}.cert h2{font-size:1.8rem;color:var(--pr)}
+@media(max-width:800px){.top{display:flex}.side{position:fixed;left:-260px;top:0;bottom:0;z-index:20;transition:left .2s;padding-top:calc(12px + env(safe-area-inset-top,0px))}.side.open{left:0}.main{padding:12px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+@media print{.side,.top,.noprint{display:none!important}body[data-pr] .cert:not(.pr){display:none}}
+</style></head><body><div id="app"></div>
+<script>
+const LV=['STARTER','BEGINNER','ELEMENTARY','PRE-INTERMEDIATE','INTERMEDIATE','ADVANCED'],REC=[3,3,4,4,5,5];
+const MN={v:'Vocabulary',s:'Spelling',g:'Grammar',p:'Picture',l:'Listening',r:'Reading',y:'Synonym & Antonym'};
+const TTS='speechSynthesis' in window;
+const WORDS=['apple,apel,🍎;cat,kucing,🐱;book,buku,📖;red,merah,🔴;dog,anjing,🐶;banana,pisang,🍌;pencil,pensil,✏️;three,tiga,3️⃣;fish,ikan,🐟;sun,matahari,☀️',
+'breakfast,sarapan,🍳;mother,ibu,👩;library,perpustakaan,📚;run,berlari,🏃;water,air,💧;market,pasar,🛒;sleep,tidur,😴;kitchen,dapur',
+'neighbor,tetangga;borrow,meminjam;ticket,tiket,🎫;weekend,akhir pekan;hungry,lapar;careful,hati-hati;medicine,obat,💊;vegetable,sayuran,🥦',
+'journey,perjalanan;invite,mengundang;brave,berani;crowded,ramai;repair,memperbaiki;receive,menerima;success,kesuksesan;delicious,lezat',
+'achieve,mencapai;environment,lingkungan;opportunity,kesempatan;solution,solusi;fortunate,beruntung;convince,meyakinkan;reliable,dapat diandalkan;generous,dermawan',
+'meticulous,teliti;inevitable,tak terelakkan;resilient,tangguh;ambiguous,ambigu;benevolent,baik hati;scrutinize,menelaah;mitigate,mengurangi dampak;pragmatic,pragmatis'];
+const HAND=`0|g|This ___ a pen.|is|am;are;be|Use "is" with "this".
+0|g|I ___ a student.|am|is;are;be|Use "am" with "I".
+0|s|Choose the correct spelling.|school|scool;skool;shcool|school is spelled s-c-h-o-o-l.
+0|s|Choose the correct spelling.|green|grean;gren;greene|green is spelled g-r-e-e-n.
+0|y|Choose the opposite of "big".|small|tall;long;wide|Big and small are opposites.
+0|r|"Tom has a red ball. He plays with it." What does Tom have?|A red ball|A blue cat;A green book;A black bag|Tom has a red ball.
+1|g|She ___ breakfast every morning.|eats|eat;eating;eated|Third person singular takes -s.
+1|g|They ___ playing football now.|are|is;am;be|Use "are" with "they".
+1|s|Choose the correct spelling.|because|becaus;beacause;becose|because: b-e-c-a-u-s-e.
+1|s|Choose the correct spelling.|friend|freind;frend;friand|friend: i before e.
+1|y|Choose a synonym for "happy".|glad|angry;tired;afraid|Glad means happy.
+1|y|Choose the opposite of "hot".|cold|warm;spicy;dry|Hot and cold are opposites.
+1|r|"Rina wears a raincoat and carries an umbrella because dark clouds cover the sky." What is the weather?|Rainy|Snowy;Very hot;Windy and dry|Raincoat, umbrella and dark clouds point to rain.
+2|g|He ___ to school every day.|goes|go;going;gone|Third person singular: goes.
+2|g|There ___ two books on the table.|are|is;was;be|Plural "two books" takes "are".
+2|s|Choose the correct spelling.|beautiful|beutiful;beautifull;butiful|beautiful: b-e-a-u-t-i-f-u-l.
+2|y|Choose a synonym for "big".|large|tiny;thin;short|Large means big.
+2|y|Choose the opposite of "easy".|difficult|simple;quick;clear|Easy and difficult are opposites.
+2|r|"Dika has a fever, so his mother gives him medicine." Why does Dika take medicine?|He is sick|He is hungry;He is late;He is sleepy|A fever means he is sick.
+3|g|They ___ happy yesterday.|were|was;is;be|Past plural: were.
+3|g|She is ___ than her sister.|taller|tallest;more tall;tall|Short adjective + -er for comparison.
+3|g|We ___ visit our grandparents next week.|will|did;was;has|"Next week" needs future "will".
+3|s|Choose the correct spelling.|receive|recieve;receeve;recive|i before e, except after c: receive.
+3|y|Choose a synonym for "brave".|courageous|fearful;lazy;rude|Courageous means brave.
+3|r|"The market was crowded, so Lina bought fruit quickly and went home." Why did Lina leave quickly?|The market was full of people|She was hungry;The fruit was cheap;It was closed|Crowded means full of people.
+4|g|If it rains tomorrow, we ___ the match.|will cancel|cancelled;would cancelled;cancel|First conditional: if + present, will + verb.
+4|g|The report ___ by the team last night.|was finished|finished;is finished;has finish|Passive past: was + past participle.
+4|s|Choose the correct spelling.|environment|enviroment;envirnoment;enviornment|environment has "n" before "m".
+4|y|Choose a synonym for "reliable".|dependable|careless;fragile;boring|Dependable means reliable.
+4|y|Choose the opposite of "generous".|selfish|kind;wealthy;polite|Generous and selfish are opposites.
+4|r|"Maya checked the weather forecast and saw that heavy rain was expected." Why did Maya take an umbrella?|She expected rain|She wanted to swim;She lost her bag;She wanted a hat|The forecast said rain was expected.
+5|g|Had I known about the change, I ___ earlier.|would have left|would leave;will leave;have left|Third conditional: had + pp, would have + pp.
+5|g|Neither the students nor the teacher ___ aware of the delay.|was|were;are;have been|The verb agrees with the nearer subject, "teacher".
+5|s|Choose the correct spelling.|necessary|neccessary;necesary;neccesary|necessary: one c, two s.
+5|y|Choose a synonym for "meticulous".|painstaking|careless;hasty;vague|Painstaking means very careful.
+5|y|Choose the opposite of "scarce".|abundant|rare;limited;costly|Scarce and abundant are opposites.
+5|r|"Although the plan looked flawless, the engineer double-checked every figure." What can we infer about the engineer?|He is cautious|He is careless;He dislikes numbers;He is in a hurry|Double-checking shows caution.`;
+const shuf=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let Q=[];const VW=[];
+WORDS.forEach((s,l)=>{const w=s.split(';').map(x=>x.split(','));w.forEach((x,i)=>{const[en,id,em]=x;VW.push({en,id,l});const pk=()=>shuf(w.filter(y=>y[0]!==en)).slice(0,3).map(y=>y[0]);
+Q.push({id:`L${l}-V${i}`,l,m:'v',q:`Which word means “${id}”?`,a:en,w:pk(),e:`“${en}” means “${id}”.`});
+Q.push({id:`L${l}-L${i}`,l,m:'l',q:'🔊 Listen and choose the word you hear.',a:en,w:pk(),e:`The word is “${en}” (${id}).`,say:en});
+if(em)Q.push({id:`L${l}-P${i}`,l,m:'p',q:'Choose the correct word for the picture.',pic:em,a:en,w:pk(),e:`${em} = “${en}” (${id}).`})})});
+HAND.split('\n').forEach((r,i)=>{const[l,m,q,a,w,e]=r.split('|');Q.push({id:`L${l}-${m.toUpperCase()}H${i}`,l:+l,m,q,a,w:w.split(';'),e})});
+Q=Q.filter(x=>x.w.length===3&&!x.w.includes(x.a));
+const MENU=[['dash','🏠','Dasbor','Dashboard'],['prof','👤','Profil Murid','Student Profile'],['learn','📖','Belajar & Latihan','Learn & Practice'],['play','🎲','Dice Bingo Game','Dice Bingo Game'],['voc','🔤','Vocabulary Bingo'],['spell','✍️','Spelling Bingo'],['gram','📐','Grammar Bingo'],['pic','🖼️','Picture Bingo'],['listen','🎧','Listening Bingo'],['read','📰','Reading Bingo'],['syn','↔️','Synonym & Antonym Bingo'],['quick','⚡','Tantangan Cepat','Quick Challenge'],['two','👥','Dua Pemain','Two Players'],['bank','🗂️','Bank Soal & Kosakata','Question & Vocabulary Bank'],['prog','📈','Kemajuan & Jurnal','My Progress & Journal'],['badges','🏅','Pencapaian & Badge','Achievements & Badges'],['lb','🏆','Leaderboard Lokal','Local Leaderboard'],['cert','📜','Sertifikat','Certificates'],['set','⚙️','Pengaturan','Settings'],['help','❓','Bantuan','Help & Instructions'],['about','ℹ️','Tentang Dice Bingo','About Dice Bingo']];
+const PRE={learn:{fmt:'free',content:'mix'},play:{fmt:'classic',content:'mix'},voc:{fmt:'classic',content:'v'},spell:{fmt:'classic',content:'s'},gram:{fmt:'classic',content:'g'},pic:{fmt:'classic',content:'p'},listen:{fmt:'classic',content:'l'},read:{fmt:'classic',content:'r'},syn:{fmt:'classic',content:'y'},quick:{fmt:'quick',content:'mix'},two:{fmt:'two',content:'mix'}};
+const BG=[['First Roll',['Selesaikan permainan pertama','Finish your first game'],s=>s.g>=1],['Vocabulary Explorer',['Jawab benar 10 soal kosakata','Answer 10 vocabulary questions correctly'],s=>(s.md.v||{c:0}).c>=10],['Bingo Beginner',['Raih Bingo pertama','Win your first Bingo'],s=>s.b>=1],['Perfect Line',['Menang Bingo tanpa jawaban salah','Win a Bingo with no wrong answers'],s=>s.perfect],['Grammar Star',['Jawab benar 8 soal grammar','Answer 8 grammar questions correctly'],s=>(s.md.g||{c:0}).c>=8],['Listening Hero',['Jawab benar 8 soal listening','Answer 8 listening questions correctly'],s=>(s.md.l||{c:0}).c>=8],['Consistent Learner',['Belajar di 3 hari berbeda','Learn on 3 different days'],s=>s.days.length>=3],['Bingo Champion',['Raih 5 Bingo','Win 5 Bingos'],s=>s.b>=5]];
+let DB={};const mem={};
+try{DB=JSON.parse(localStorage.getItem('dicebingo')||'{}')}catch(e){DB={}}
+DB.profiles=DB.profiles||{};DB.cfg=Object.assign({lang:'en',theme:'auto',snd:true,anim:true,hint:true,time:120,lb:true},DB.cfg);
+const save=()=>{try{localStorage.setItem('dicebingo',JSON.stringify(DB))}catch(e){}};
+let lang=DB.cfg.lang,cur=DB.profiles[DB.cur]||null,page=cur?'dash':'welcome',act='dash',G=null,TM=0,menu=false,jf='all',confirmReset=false;
+let gc={level:0,content:'mix',fmt:'classic',size:3,free:false,p1:'',p2:''};
+const L=(a,b)=>lang==='id'?a:b,$=s=>document.querySelector(s);
+const face=n=>'⚀⚁⚂⚃⚄⚅'[n-1];
+function theme(){document.documentElement.dataset.theme=DB.cfg.theme==='auto'?'':DB.cfg.theme}
+function beep(f){if(!DB.cfg.snd)return;try{const c=beep.c||(beep.c=new(window.AudioContext||window.webkitAudioContext)()),o=c.createOscillator(),g=c.createGain();o.frequency.value=f;g.gain.value=.05;o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+.12)}catch(e){}}
+function speak(w){if(!TTS)return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(w);u.lang='en-US';u.rate=.85;speechSynthesis.speak(u)}catch(e){}}
+const pool=(l,c)=>Q.filter(x=>x.l===l&&(c==='mix'||x.m===c)&&(x.m!=='l'||TTS));
+const lines=n=>{const r=[];for(let i=0;i<n;i++){r.push([...Array(n)].map((_,j)=>i*n+j));r.push([...Array(n)].map((_,j)=>j*n+i))}r.push([...Array(n)].map((_,i)=>i*(n+1)));r.push([...Array(n)].map((_,i)=>(i+1)*(n-1)));return r};
+function setLang(l){lang=l;DB.cfg.lang=l;save();render()}
+function nav(id){clearInterval(TM);if(PRE[id]){gc={...gc,...PRE[id]};page='setup'}else page=id;act=id;menu=false;render();scrollTo(0,0)}
+function login(){const v=i=>$('#f'+i).value.trim();if(!v(1)||!v(3)||!v(4)){$('#er').textContent=L('Mohon lengkapi semua kolom terlebih dahulu.','Please complete all fields before continuing.');return}
+const id=btoa(unescape(encodeURIComponent([v(1),v(2),v(3),v(4)].join('~').toLowerCase()))).replace(/=/g,'');
+cur=DB.profiles[id]||(DB.profiles[id]={id,name:v(1),cls:v(2),no:v(3),school:v(4),st:{g:0,a:0,c:0,sc:0,b:0,lv:{},md:{},days:[],perfect:false},jr:[],done:{}});DB.cur=id;save();page='dash';act='dash';render()}
+function sw(k){cur=DB.profiles[k];DB.cur=k;save();page='dash';act='dash';render()}
+function saveProf(){const v=i=>$('#e'+i).value.trim();if(!v(1)||!v(3)||!v(4)){$('#er').textContent=L('Semua kolom wajib diisi.','All fields are required.');return}Object.assign(cur,{name:v(1),cls:v(2),no:v(3),school:v(4)});save();$('#er').textContent='✓ '+L('Tersimpan','Saved')}
+function logout(){DB.cur=null;cur=null;page='welcome';save();render()}
+function setGC(k,v){gc[k]=v;if(k==='level')gc.size=REC[v];if(k==='size'&&v!==5)gc.free=false;render()}
+function startGame(){const n=gc.size,N=n*n;clearInterval(TM);G={...gc,level:gc.level,N,max:N,own:Array(N).fill(-2),sel:[],d:0,q:null,asked:0,cor:[0,0],wro:[0,0],sc:[0,0],used:new Set(),turn:0,over:false,t0:Date.now(),rolled:false,left:DB.cfg.time,names:gc.fmt==='two'?[gc.p1||L('Pemain 1','Player 1'),gc.p2||L('Pemain 2','Player 2')]:[cur.name]};
+if(gc.free&&n===5)G.own[12]=-1;page='game';
+if(gc.fmt==='quick')TM=setInterval(()=>{if(!G||G.over||page!=='game'){clearInterval(TM);return}G.left--;const e=$('#tm');if(e)e.textContent=G.left;if(G.left<=0)end('time')},1000);render()}
+function roll(){if(G.rolled||G.q||G.over)return;G.rolled='busy';const fin=1+Math.floor(Math.random()*6);
+const done=()=>{G.d=fin;G.rolled=true;G.sel=G.own.map((o,i)=>o===-2&&i%6===fin-1?i:-1).filter(i=>i>=0);if(!G.sel.length)G.sel=G.own.map((o,i)=>o===-2?i:-1).filter(i=>i>=0);beep(520);render()};
+if(!DB.cfg.anim||matchMedia('(prefers-reduced-motion: reduce)').matches){done();return}
+let k=0;const el=$('#die'),iv=setInterval(()=>{el.textContent=face(1+Math.floor(Math.random()*6));el.classList.toggle('spin');if(++k>8){clearInterval(iv);done()}},70)}
+function cell(i){if(!G.rolled||G.rolled==='busy'||G.q||G.over||!G.sel.includes(i))return;let p=pool(G.level,G.content).filter(x=>!G.used.has(x.id));if(!p.length){G.used.clear();p=pool(G.level,G.content)}
+const q=p[Math.floor(Math.random()*p.length)];G.used.add(q.id);G.asked++;G.q={...q,o:shuf([q.a,...q.w]),cell:i,pick:null,hint:false,done:false};render();if(q.say)speak(q.say)}
+function pick(k){if(G.q.done)return;G.q.pick=k;render()}
+function check(){const q=G.q;if(q.pick==null||q.done)return;q.done=true;const p=G.turn,ok=q.o[q.pick]===q.a,pts=ok&&G.fmt!=='free'?(q.hint?5:10):0;
+if(ok){G.own[q.cell]=p;G.sc[p]+=pts;G.cor[p]++}else G.wro[p]++;q.fb={ok,pts};beep(ok?660:200);
+if(G.fmt!=='two'||p===0){const st=cur.st;st.a++;if(ok)st.c++;const m=st.md[q.m]=st.md[q.m]||{a:0,c:0};m.a++;if(ok)m.c++;save()}render()}
+function next(){const q=G.q,p=G.turn;G.q=null;if(q.fb.ok){const w=lines(G.size).filter(l=>l.every(i=>G.own[i]===p||G.own[i]===-1));if(w.length)return end('bingo',p,w)}
+if(G.asked>=G.max)return end('limit');if(G.fmt==='two')G.turn=1-p;G.rolled=false;G.sel=[];G.d=0;render()}
+function end(kind,p,w){if(G.over)return;clearInterval(TM);G.over=true;G.kind=kind;G.winner=-1;G.win=[];
+if(kind==='bingo'){G.winner=p;G.win=[...new Set(w.flat())];if(G.fmt!=='free')G.sc[p]+=25*w.length}else if(G.fmt==='two'&&G.sc[0]!==G.sc[1])G.winner=G.sc[0]>G.sc[1]?0:1;
+if(G.fmt!=='free')G.sc=G.sc.map((x,i)=>G.names[i]?x+10:x);
+const st=cur.st,l=G.level,a=G.cor[0]+G.wro[0],won=kind==='bingo'&&p===0,day=new Date().toISOString().slice(0,10);
+st.g++;st.sc+=G.sc[0];if(won)st.b++;const x=st.lv[l]=st.lv[l]||{g:0,b:0};x.g++;if(won)x.b++;if(!st.days.includes(day))st.days.push(day);if(won&&!G.wro[0])st.perfect=true;
+if(won&&a&&G.cor[0]/a>=.6&&G.fmt!=='free')cur.done[l]={sc:G.sc[0],b:st.b,date:day};
+cur.jr.unshift({d:new Date().toLocaleString(),l,c:G.content,f:G.fmt,n:G.size,a,k:G.cor[0],sc:G.sc[0],b:won?1:0,s:Math.round((Date.now()-G.t0)/1000)});cur.jr=cur.jr.slice(0,100);save();render()}
+const FM={classic:'Classic',quick:'Quick',two:'Two Players',free:'Free Practice'};
+const card=(l,v)=>`<div class="st"><b>${v}</b><span class="mu sm">${l}</span></div>`;
+function vWelcome(){const ps=Object.values(DB.profiles);return `<div class="narrow"><div class="card c"><div class="logo" aria-hidden="true">🎲</div><h1>${L('SELAMAT DATANG DI DICE BINGO!','WELCOME TO DICE BINGO!')}</h1><p class="mu"><em>${L('Lempar dadu, belajar Inggris, dapatkan Bingo!','Roll the Dice, Learn English, and Get Bingo!')}</em></p>
+<div>${langBtns()}</div>
+<label for="f1">${L('Nama','Student Name')}</label><input id="f1" autocomplete="off">
+<label for="f2">${L('Kelas','Class')}</label><select id="f2">${[4,5,6,7,8,9,10,11,12].map(x=>`<option>${x}</option>`).join('')}<option>${L('Lainnya','Other')}</option></select>
+<label for="f3">${L('Nomor Presensi','Attendance Number')}</label><input id="f3" autocomplete="off">
+<label for="f4">${L('Asal Madrasah/Sekolah','Madrasah or School Name')}</label><input id="f4" autocomplete="off">
+<p id="er" class="er" role="alert"></p><button class="btn pr" onclick="login()">${L('Lanjutkan','Continue')}</button>
+${ps.length?`<h3>${L('Profil tersimpan','Saved profiles')}</h3>${ps.map(p=>`<button class="btn" onclick="sw('${p.id}')">${esc(p.name)} (${esc(p.cls)})</button>`).join('')}`:''}
+<p class="mu sm">Created by Ahmad Budi Leksono</p></div></div>`}
+const langBtns=()=>`<button class="btn ${lang==='id'?'pr':''}" onclick="setLang('id')">Bahasa Indonesia</button><button class="btn ${lang==='en'?'pr':''}" onclick="setLang('en')">English</button>`;
+function shell(h){return `<div class="top"><button class="btn" aria-label="Menu" onclick="menu=!menu;render()">☰</button><b>🎲 Dice Bingo</b></div><div class="shell"><nav class="side ${menu?'open':''}" aria-label="Menu"><h3>🎲 DICE BINGO</h3><p class="mu sm">${esc(cur.name)} · ${esc(cur.cls)}</p>${MENU.map(m=>`<button class="${act===m[0]?'act':''}" onclick="nav('${m[0]}')">${m[1]} ${lang==='id'?m[2]:(m[3]||m[2])}</button>`).join('')}<p class="mu sm">Created by Ahmad Budi Leksono</p></nav><main class="main">${h}</main></div>`}
+function vDash(){const s=cur.st,acc=s.a?Math.round(100*s.c/s.a):0,bd=BG.filter(b=>b[2](s)).length;let reco=L('Mulai permainan pertamamu untuk melihat kemajuan.','Start your first game to see your progress.');
+if(s.g){const ms=Object.entries(s.md).filter(([k,m])=>m.a>=3).sort((a,b)=>a[1].c/a[1].a-b[1].c/b[1].a);reco=ms.length?L('Perbanyak latihan: ','Practice more: ')+MN[ms[0][0]]+' Bingo':L('Teruslah bermain untuk mendapat rekomendasi.','Keep playing to get recommendations.')}
+return `<h1>${L('Selamat datang, ','Welcome, ')}${esc(cur.name)}! ${L('Siap bermain Dice Bingo?','Ready to play Dice Bingo?')}</h1><p class="mu">${L('Kelas','Class')} ${esc(cur.cls)} · No. ${esc(cur.no)} · ${esc(cur.school)}</p>
+<div class="sts">${card(L('Permainan','Games'),s.g)}${card(L('Soal dijawab','Answered'),s.a)}${card(L('Benar','Correct'),s.c)}${card(L('Akurasi','Accuracy'),acc+'%')}${card(L('Skor total','Total score'),s.sc)}${card('Bingo',s.b)}${card('Badge',bd+'/'+BG.length)}</div>
+<div class="card"><h3>💡 ${L('Rekomendasi','Recommendation')}</h3><p>${reco}</p><button class="btn pr" onclick="nav('play')">🎲 ${L('Mulai Permainan','Start Game')}</button></div>
+<div class="card"><h3>${L('Progres Level','Level Progress')}</h3>${LV.map((n,i)=>{const x=s.lv[i]||{g:0,b:0};return `<p><b>${n}</b> — ${x.g} ${L('permainan','games')}, ${x.b} Bingo, ${pool(i,'mix').length} ${L('soal tersedia','questions available')}</p><div class="bar"><i style="width:${Math.min(100,x.b*20)}%"></i></div>`}).join('')}</div>
+<div class="card"><h3>${L('Riwayat Terakhir','Recent Games')}</h3>${cur.jr.length?cur.jr.slice(0,5).map(j=>`<p>${esc(j.d)} · ${LV[j.l]} · ${j.k}/${j.a} · ${L('skor','score')} ${j.sc}${j.b?' · Bingo!':''}</p>`).join(''):`<p class="mu">${L('Belum ada riwayat.','No history yet.')}</p>`}</div>`}
+function vProf(){return `<h2>${L('Profil Murid','Student Profile')}</h2><div class="card"><label for="e1">${L('Nama','Student Name')}</label><input id="e1" value="${esc(cur.name)}"><label for="e2">${L('Kelas','Class')}</label><select id="e2">${[4,5,6,7,8,9,10,11,12,L('Lainnya','Other')].map(x=>`<option ${String(x)===cur.cls?'selected':''}>${x}</option>`).join('')}</select><label for="e3">${L('Nomor Presensi','Attendance Number')}</label><input id="e3" value="${esc(cur.no)}"><label for="e4">${L('Asal Madrasah/Sekolah','Madrasah or School Name')}</label><input id="e4" value="${esc(cur.school)}"><p id="er" class="er" role="alert"></p><button class="btn pr" onclick="saveProf()">${L('Simpan','Save')}</button><button class="btn" onclick="logout()">${L('Sesi baru / ganti profil','New session / switch profile')}</button></div><p class="mu sm">${L('Progres setiap profil disimpan terpisah di perangkat ini.','Each profile’s progress is stored separately on this device.')}</p>`}
+function vSetup(){const n=pool(gc.level,gc.content).length,o=(v,t,c)=>`<option value="${v}" ${c==v?'selected':''}>${t}</option>`;
+return `<h2>🎲 ${L('Atur Permainan','Game Setup')}</h2><div class="card grid2"><div><label>Level</label><select onchange="setGC('level',+this.value)">${LV.map((x,i)=>o(i,x,gc.level)).join('')}</select></div>
+<div><label>${L('Materi','Content')}</label><select onchange="setGC('content',this.value)">${o('mix',L('Campuran','Mixed'),gc.content)}${Object.entries(MN).map(([k,v])=>o(k,v,gc.content)).join('')}</select></div>
+<div><label>${L('Format','Format')}</label><select onchange="setGC('fmt',this.value)">${Object.entries(FM).map(([k,v])=>o(k,v,gc.fmt)).join('')}</select></div>
+<div><label>${L('Ukuran papan','Board size')}</label><select onchange="setGC('size',+this.value)">${[3,4,5].map(x=>o(x,x+'×'+x,gc.size)).join('')}</select></div>
+${gc.size===5?`<div><label><input type="checkbox" ${gc.free?'checked':''} onchange="setGC('free',this.checked)"> FREE SPACE</label></div>`:''}
+${gc.fmt==='two'?`<div><label>${L('Pemain 1','Player 1')}</label><input value="${esc(gc.p1)}" oninput="gc.p1=this.value"></div><div><label>${L('Pemain 2','Player 2')}</label><input value="${esc(gc.p2)}" oninput="gc.p2=this.value"></div>`:''}</div>
+<div class="card"><h3>${L('Aturan & skor','Rules & scoring')}</h3><ul><li>${L('Dadu d (1–6) membuka petak bernomor d, d+6, d+12… Jika semuanya sudah terisi, petak kosong mana pun boleh dipilih.','Dice d (1–6) unlocks squares numbered d, d+6, d+12… If all are taken, any empty square can be chosen.')}</li>
+<li>${L('Jawaban benar: +10 (+5 jika memakai petunjuk) dan petak ditandai. Salah: 0 dan petak tetap tersedia.','Correct: +10 (+5 with a hint) and the square is marked. Wrong: 0 and the square stays open.')}</li>
+<li>${L('Garis Bingo (baris/kolom/diagonal): +25 per garis. Menyelesaikan sesi: +10.','Bingo line (row/column/diagonal): +25 per line. Finishing a session: +10.')}</li>
+<li>${L('Batas soal: ','Question limit: ')}${gc.size*gc.size}${gc.fmt==='quick'?L(' atau waktu '+DB.cfg.time+' detik habis.',' or the '+DB.cfg.time+'s timer ends.'):'.'}${gc.fmt==='free'?L(' Latihan bebas tidak memberi skor.',' Free Practice gives no score.'):''}${gc.fmt==='two'?L(' Pemain bergantian; menang dengan Bingo, atau skor tertinggi jika tidak ada Bingo.',' Players alternate; win by Bingo, or the higher score if there is no Bingo.'):''}</li></ul>
+<p>${L('Soal tersedia','Questions available')}: <b>${n}</b> ${n?'':'— '+L('tidak tersedia di peramban ini.','not available in this browser.')}</p><button class="btn pr" ${n?'':'disabled'} onclick="startGame()">${L('Mulai Permainan','Start Game')}</button></div>`}
+function vGame(){const n=G.size,p=G.turn,q=G.q;
+const cells=G.own.map((o,i)=>{const hl=G.sel.includes(i)&&!G.q&&!G.over;return `<button class="cell ${o>=0?'m'+o:''} ${o===-1?'fr':''} ${hl?'hl':''} ${G.win&&G.win.includes(i)?'win':''}" ${hl?'':'tabindex="-1"'} aria-label="${L('Petak','Square')} ${i+1}${o>=0?' '+L('ditandai','marked'):''}" onclick="cell(${i})">${o===-1?'FREE':o===0?'✓ '+(i+1):o===1?'★ '+(i+1):i+1}</button>`}).join('');
+let res='';if(G.over){const w=G.winner;res=`<div class="card"><h2>${G.kind==='bingo'?'BINGO! YOU DID IT!':L('Permainan Selesai','Game Over')}</h2><p>${G.kind==='bingo'?(G.fmt==='two'?esc(G.names[w])+' '+L('menang!','wins!')+' ':'')+L('Selamat! Kamu melengkapi satu garis dan menjawab tantangan belajar dengan benar.','Congratulations! You completed a winning line and answered the learning challenges correctly.'):(G.fmt==='two'?(w<0?L('Seri.','Draw.'):esc(G.names[w])+' '+L('menang berdasarkan skor.','wins on score.')):L('Belum ada garis Bingo kali ini. Petak ditandai: ','No Bingo line this time. Squares marked: ')+(G.kind==='bingo'?'':G.own.filter(o=>o>=0).length))}</p>
+<p>${G.names.map((nm,i)=>`${esc(nm)}: ${L('skor','score')} <b>${G.sc[i]}</b>, ✔ ${G.cor[i]}, ✘ ${G.wro[i]}`).join('<br>')}</p><button class="btn pr" onclick="startGame()">${L('Ulangi Permainan','Play Again')}</button><button class="btn" onclick="nav('dash')">${L('Dasbor','Dashboard')}</button></div>`}
+let qp='';if(q){const f=q.fb;qp=`<div class="card" aria-live="polite">${q.pic?`<div class="pic" role="img" aria-label="${L('Gambar soal','Question picture')}">${q.pic}</div>`:''}<h3>${esc(q.q)}</h3>${q.say?`<button class="btn" onclick="speak('${q.say}')">🔊 ${L('Putar audio','Play audio')}</button>`:''}
+${q.o.map((o,k)=>`<button class="opt ${f?(o===q.a?'ok':k===q.pick?'bad':''):k===q.pick?'sel':''}" ${f?'disabled':''} onclick="pick(${k})">${'ABCD'[k]}. ${esc(o)}${f&&o===q.a?' ✓':f&&k===q.pick?' ✗':''}</button>`).join('')}
+${f?`<p><b>${f.ok?L('Benar!','Correct!')+(G.fmt==='free'?'':' +'+f.pts+' '+L('poin','points')):L('Belum tepat. Jawaban: ','Not quite. Answer: ')+esc(q.a)}</b><br>${esc(q.e)}</p><button class="btn pr" onclick="next()">${L('Lanjut','Next')}</button>`
+:`${q.hint?`<p class="mu">💡 ${L('Diawali huruf','Starts with')} “${esc(q.a[0])}” (${q.a.length} ${L('huruf','letters')})</p>`:(DB.cfg.hint?`<button class="btn" onclick="G.q.hint=true;render()">💡 ${L('Petunjuk','Hint')}</button>`:'')}<button class="btn pr" ${q.pick==null?'disabled':''} onclick="check()">${L('Periksa Jawaban','Check Answer')}</button>`}</div>`}
+const dm=G.d?`${L('Dadu','Dice')} ${G.d}: ${L('petak','squares')} ${G.sel.map(i=>i+1).join(', ')}`:L('Lempar dadu, lalu pilih petak yang menyala.','Roll the dice, then pick a highlighted square.');
+return `<h2>${LV[G.level]} · ${G.content==='mix'?L('Campuran','Mixed'):MN[G.content]} · ${n}×${n}</h2>${res}<div class="row">${G.names.map((nm,i)=>`<span class="pill ${G.fmt==='two'&&i===p&&!G.over?'on':''}">${i?'★':'✓'} ${esc(nm)}: <b>${G.sc[i]}</b></span>`).join('')}${G.fmt==='quick'?`<span class="pill">⏱ <b id="tm">${Math.max(0,G.left)}</b>s</span>`:''}<span class="pill">${L('Soal','Question')} ${G.asked}/${G.max}</span></div>
+${G.over?'':`<div class="row" style="margin:12px 0"><div id="die" class="die" aria-live="polite">${G.d?face(G.d):'🎲'}</div><div><button class="btn pr" ${G.rolled||G.q?'disabled':''} onclick="roll()">🎲 ${L('Lempar Dadu','Roll Dice')}</button><p class="mu">${G.fmt==='two'?esc(G.names[p])+': ':''}${dm}</p></div></div>`}${qp}
+<div class="board" style="grid-template-columns:repeat(${n},1fr)" role="group" aria-label="${L('Papan Bingo','Bingo Board')}">${cells}</div>`}
+function vProg(){const s=cur.st,ms=Object.entries(s.md),js=cur.jr.filter(j=>jf==='all'||j.l==jf);
+return `<h2>${L('Kemajuan & Jurnal','My Progress & Journal')}</h2>${s.g?'':`<p class="mu">${L('Mulai latihan untuk melihat kemajuan.','Start playing to see your progress.')}</p>`}<div class="sts">${card(L('Akurasi','Accuracy'),s.a?Math.round(100*s.c/s.a)+'%':'-')}${card(L('Skor','Score'),s.sc)}${card('Bingo',s.b)}${card(L('Hari belajar','Study days'),s.days.length)}</div>
+<div class="card"><h3>${L('Akurasi per materi','Accuracy by content')}</h3>${ms.length?ms.map(([k,m])=>`<p>${MN[k]}: ${m.c}/${m.a} (${Math.round(100*m.c/m.a)}%)</p><div class="bar"><i style="width:${100*m.c/m.a}%"></i></div>`).join(''):`<p class="mu">${L('Belum ada data.','No data yet.')}</p>`}</div>
+<div class="card"><h3>${L('Jurnal belajar','Learning journal')}</h3><label for="jf">${L('Filter level','Level filter')}</label><select id="jf" onchange="jf=this.value;render()"><option value="all">${L('Semua','All')}</option>${LV.map((x,i)=>`<option value="${i}" ${jf==i?'selected':''}>${x}</option>`).join('')}</select>
+<div class="tw"><table><tr><th>${L('Tanggal','Date')}</th><th>Level</th><th>${L('Materi','Content')}</th><th>${L('Format','Format')}</th><th>${L('Papan','Board')}</th><th>${L('Benar/Soal','Right/Qs')}</th><th>${L('Skor','Score')}</th><th>Bingo</th><th>${L('Durasi','Time')}</th></tr>${js.map(j=>`<tr><td>${esc(j.d)}</td><td>${LV[j.l]}</td><td>${j.c==='mix'?'Mix':MN[j.c]}</td><td>${FM[j.f]}</td><td>${j.n}×${j.n}</td><td>${j.k}/${j.a}</td><td>${j.sc}</td><td>${j.b}</td><td>${j.s}s</td></tr>`).join('')}</table></div></div>`}
+function vBadges(){return `<h2>${L('Pencapaian & Badge','Achievements & Badges')}</h2>${BG.map(b=>{const u=b[2](cur.st);return `<div class="card"><b>${u?'🏅':'🔒'} ${b[0]}</b> — ${u?L('Terbuka','Unlocked'):L('Terkunci','Locked')}<br><span class="mu">${L(b[1][0],b[1][1])}</span></div>`}).join('')}`}
+function vLb(){const r=Object.values(DB.profiles).sort((a,b)=>b.st.sc-a.st.sc);return `<h2>🏆 Local Leaderboard</h2><p class="mu sm">${L('Data lokal perangkat ini. Hanya nama depan yang ditampilkan.','Local data from this device. Only first names are shown.')}</p>${DB.cfg.lb?`<div class="card tw"><table><tr><th>#</th><th>${L('Nama','Name')}</th><th>${L('Skor','Score')}</th><th>Bingo</th></tr>${r.map((p,i)=>`<tr><td>${i+1}</td><td>${esc(p.name.split(' ')[0])}</td><td>${p.st.sc}</td><td>${p.st.b}</td></tr>`).join('')}</table></div>`:`<p>${L('Leaderboard dinonaktifkan di Pengaturan.','Leaderboard is turned off in Settings.')}</p>`}`}
+function printCert(l){document.querySelectorAll('.cert').forEach(c=>c.classList.toggle('pr',c.dataset.l==l));document.body.dataset.pr=1;print();setTimeout(()=>delete document.body.dataset.pr,500)}
+function vCert(){const d=Object.entries(cur.done);return `<h2>${L('Sertifikat','Certificates')}</h2>${d.length?d.map(([l,x])=>`<div class="cert" data-l="${l}"><div class="cb"><h3>🎲 DICE BINGO</h3><h2>Certificate of Achievement</h2><p>${L('Diberikan kepada','Awarded to')}</p><h2 style="color:inherit">${esc(cur.name)}</h2><p>${L('Kelas','Class')} ${esc(cur.cls)} · ${esc(cur.school)}</p><p>${L('Level diselesaikan','Level completed')}: <b>${LV[l]}</b><br>${L('Skor','Score')}: ${x.sc} · Bingo: ${x.b}<br>${x.date}</p><p class="sm">Created by Ahmad Budi Leksono</p></div><button class="btn noprint" onclick="printCert(${l})">🖨 ${L('Cetak / Simpan PDF','Print / Save as PDF')}</button></div>`).join(''):`<div class="card"><p>${L('Belum ada sertifikat. Menangkan Bingo pada sebuah level dengan akurasi minimal 60% (bukan Latihan Bebas).','No certificates yet. Win a Bingo at a level with at least 60% accuracy (not Free Practice).')}</p></div>`}`}
+function vBank(){const q=($('#vs')||{}).value||'',lf=($('#vl')||{}).value||'all';
+return `<h2>${L('Bank Soal & Kosakata','Question & Vocabulary Bank')}</h2><div class="card tw"><p>${L('Jumlah soal aktual','Actual number of questions')}: <b>${Q.length}</b> (${L('target awal 600; bank akan diperluas bertahap','initial target 600; the bank will be expanded gradually')})</p><table><tr><th>Level</th>${Object.values(MN).map(m=>`<th>${m}</th>`).join('')}<th>Total</th></tr>${LV.map((n,i)=>`<tr><td>${n}</td>${Object.keys(MN).map(m=>`<td>${Q.filter(x=>x.l===i&&x.m===m).length}</td>`).join('')}<td><b>${Q.filter(x=>x.l===i).length}</b></td></tr>`).join('')}</table></div>
+<div class="card"><h3>${L('Kosakata','Vocabulary')}</h3><div class="grid2"><div><label for="vs">${L('Cari','Search')}</label><input id="vs" value="${esc(q)}" oninput="render();$('#vs').focus();$('#vs').setSelectionRange(99,99)"></div><div><label for="vl">Level</label><select id="vl" onchange="render()"><option value="all">${L('Semua','All')}</option>${LV.map((x,i)=>`<option value="${i}" ${lf==i?'selected':''}>${x}</option>`).join('')}</select></div></div>
+<div class="tw"><table><tr><th>English</th><th>Indonesia</th><th>Level</th><th></th></tr>${VW.filter(w=>(lf==='all'||w.l==lf)&&(w.en+w.id).toLowerCase().includes(q.toLowerCase())).map(w=>`<tr><td>${w.en}</td><td>${w.id}</td><td>${LV[w.l]}</td><td>${TTS?`<button class="btn" aria-label="${L('Dengarkan','Listen')} ${w.en}" onclick="speak('${w.en}')">🔊</button>`:''}</td></tr>`).join('')}</table></div></div>`}
+function vSet(){const c=DB.cfg,ck=(k,t)=>`<label><input type="checkbox" ${c[k]?'checked':''} onchange="DB.cfg.${k}=this.checked;save();render()"> ${t}</label>`;
+return `<h2>${L('Pengaturan','Settings')}</h2><div class="card"><label>${L('Bahasa','Language')}</label>${langBtns()}<label for="th">${L('Tema','Theme')}</label><select id="th" onchange="DB.cfg.theme=this.value;save();theme()"><option value="auto" ${c.theme==='auto'?'selected':''}>Auto</option><option value="light" ${c.theme==='light'?'selected':''}>${L('Terang','Light')}</option><option value="dark" ${c.theme==='dark'?'selected':''}>${L('Gelap','Dark')}</option></select>
+${ck('snd',L('Efek suara','Sound effects'))}${ck('anim',L('Animasi dadu','Dice animation'))}${ck('hint',L('Tombol petunjuk','Hint button'))}${ck('lb',L('Tampilkan leaderboard','Show leaderboard'))}
+<label for="tt">${L('Durasi Tantangan Cepat (detik)','Quick Challenge duration (seconds)')}</label><select id="tt" onchange="DB.cfg.time=+this.value;save()">${[60,90,120,180,300].map(x=>`<option ${c.time===x?'selected':''}>${x}</option>`).join('')}</select></div>
+<div class="card"><h3>${L('Data','Data')}</h3><p class="mu sm">${L('Progres disimpan di peramban perangkat ini saja (tidak ada cloud).','Progress is stored only in this device’s browser (no cloud).')}</p><button class="btn" onclick="if(confirmReset){cur.st={g:0,a:0,c:0,sc:0,b:0,lv:{},md:{},days:[],perfect:false};cur.jr=[];cur.done={};save();confirmReset=false}else confirmReset=true;render()">${confirmReset?L('Yakin? Klik lagi untuk menghapus.','Sure? Click again to delete.'):L('Reset progres profil ini','Reset this profile’s progress')}</button></div>`}
+function vHelp(){return `<h2>${L('Bantuan & Petunjuk','Help & Instructions')}</h2><div class="card"><ol><li>${L('Pilih level, materi, format, dan ukuran papan.','Choose a level, content, format and board size.')}</li><li>${L('Tekan Lempar Dadu. Angka dadu menentukan petak yang menyala.','Press Roll Dice. The number decides which squares light up.')}</li><li>${L('Pilih petak, jawab soal, lalu tekan Periksa Jawaban.','Pick a square, answer the question, then press Check Answer.')}</li><li>${L('Jawaban benar menandai petak. Lengkapi satu baris, kolom, atau diagonal untuk Bingo.','A correct answer marks the square. Complete a row, column or diagonal to get Bingo.')}</li><li>${L('Kemenangan hanya diberikan jika garis benar-benar lengkap.','A win is only given when a line is truly complete.')}</li></ol></div>`}
+function vAbout(){return `<h2>${L('Tentang Dice Bingo','About Dice Bingo')}</h2><div class="card"><p>${L('Permainan belajar bahasa Inggris yang memadukan dadu, papan Bingo, dan tantangan kosakata, ejaan, grammar, bacaan, serta listening.','An English-learning game that combines dice, a Bingo board, and challenges in vocabulary, spelling, grammar, reading and listening.')}</p><p><b>Created by Ahmad Budi Leksono</b></p><p class="mu sm">${L('Belum tersedia: Classroom Challenge, Teacher Dashboard, dan sinkronisasi online (memerlukan backend). Bank soal saat ini: ','Not yet available: Classroom Challenge, Teacher Dashboard and online sync (these need a backend). Current question bank: ')}${Q.length}.</p></div>`}
+const V={dash:vDash,prof:vProf,setup:vSetup,game:vGame,prog:vProg,badges:vBadges,lb:vLb,cert:vCert,bank:vBank,set:vSet,help:vHelp,about:vAbout};
+function render(){theme();document.documentElement.lang=lang;$('#app').innerHTML=page==='welcome'?vWelcome():shell((V[page]||vDash)())}
+render();
+</script></body></html>
